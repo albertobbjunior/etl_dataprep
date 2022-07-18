@@ -1,0 +1,162 @@
+data:
+  #PKS runs only in pks_cluster, change it to 000 if you want to execute in zoe
+  mode: cluster
+  version: v1
+  project_name: pythia_partners_ams_inbound
+  #output_folder: '/user/blg_ds1'
+  output_folder: '/user/blg_ds'
+  input_folder: '/user/blg_ds/flight_legs/'
+  #input_folder: '/opt/data/raw/'
+  date_window_start: 2022-06-22
+  date_window_end: 2022-06-22
+row_key_compose:
+  - row_key:departure_date
+  - row_key:carrier_name
+  - row_key:flight_number
+  - row_key:flight_suffix
+  - row_key:departure_airport
+features:
+  basic_info:
+  - aircraft_type
+  - arrival_airport
+  - flight_cancelled
+  - service_type
+  - commercial_first_class_configuration
+  - commercial_business_class_configuration
+  - commercial_premium_comfort_class_configuration
+  - commercial_economy_class_configuration
+  - total_blocked_first_class_seats_protected
+  - total_blocked_first_class_seats_other
+  - total_blocked_business_class_seats_protected
+  - total_blocked_business_class_seats_other
+  - total_blocked_economy_class_seats_protected
+  - total_blocked_economy_class_seats_other
+  - total_blocked_premium_comfort_class_seats_protected
+  - total_blocked_premium_comfort_class_seats_other
+  bookings:
+  - total_first_class_staff_standby_bookings
+  - total_business_class_staff_standby_bookings
+  - total_economy_class_staff_standby_bookings
+  - total_premium_comfort_class_staff_standby_bookings
+  - total_first_class_bookings_first_leg_in_journey
+  - total_first_class_bookings_with_previous_eur_flight
+  - total_first_class_bookings_with_previous_ica_flight
+  - total_first_class_bookings_with_previous_unknown_flight
+  - total_business_class_bookings_first_leg_in_journey
+  - total_business_class_bookings_with_previous_eur_flight
+  - total_business_class_bookings_with_previous_ica_flight
+  - total_business_class_bookings_with_previous_unknown_flight
+  - total_premium_comfort_class_bookings_first_leg_in_journey
+  - total_premium_comfort_class_bookings_with_previous_eur_flight
+  - total_premium_comfort_class_bookings_with_previous_ica_flight
+  - total_premium_comfort_class_bookings_with_previous_unknown_flight
+  - total_economy_class_bookings_first_leg_in_journey
+  - total_economy_class_bookings_with_previous_eur_flight
+  - total_economy_class_bookings_with_previous_ica_flight
+  - total_economy_class_bookings_with_previous_unknown_flight
+  - total_first_class_bookings_last_leg_in_journey
+  - total_first_class_bookings_with_onward_eur_flight
+  - total_first_class_bookings_with_onward_ica_flight
+  - total_first_class_bookings_with_onward_unknown_flight
+  - total_business_class_bookings_last_leg_in_journey
+  - total_business_class_bookings_with_onward_eur_flight
+  - total_business_class_bookings_with_onward_ica_flight
+  - total_business_class_bookings_with_onward_unknown_flight
+  - total_premium_comfort_class_bookings_last_leg_in_journey
+  - total_premium_comfort_class_bookings_with_onward_eur_flight
+  - total_premium_comfort_class_bookings_with_onward_ica_flight
+  - total_premium_comfort_class_bookings_with_onward_unknown_flight
+  - total_economy_class_bookings_last_leg_in_journey
+  - total_economy_class_bookings_with_onward_eur_flight
+  - total_economy_class_bookings_with_onward_ica_flight
+  - total_economy_class_bookings_with_onward_unknown_flight
+  timestamps:
+  - scheduled_departure_time
+  - scheduled_arrival_time
+targets:
+  basic_info:
+  - flight_cancelled
+  - arrival_airport
+  - service_type
+  pax_counts:
+  - business_class_pax_boarded
+  - economy_pax_boarded
+  - first_class_pax_boarded
+  timestamps:
+  - scheduled_departure_time
+query_moments:
+  reference:
+    namespace: default
+    table: flight_legs
+    column_family: timestamps
+    qualifier: scheduled_departure_time
+  fixed:
+    - 180d
+    - 175d
+    - 168d
+    - 161d
+    - 154d
+    - 147d
+    - 140d
+    - 133d
+    - 126d
+    - 119d
+    - 112d
+    - 105d
+    - 98d
+    - 91d
+    - 84d
+    - 77d
+    - 70d
+    - 63d
+    - 56d
+    - 49d
+    - 42d
+    - 34d
+    - 32d
+    - 30d
+    - 28d
+    - 26d
+    - 24d
+    - 22d
+    - 20d
+    - 18d
+    - 17d
+    - 16d
+    - 14d
+    - 12d
+    - 10d
+    - 8d
+    - 7d
+    - 6d
+    - 4d
+    - 3d
+    - 2d
+    - 1d
+    - 20h
+    - 16h
+    - 12h
+    - 8h
+    - 4h
+filters:
+  target_level:
+    - column_family: row_key
+      qualifier: carrier_name
+      filter_value: A9,AF,AM,AZ,CI,CZ,DL,KE,KQ,ME,MF,MU,RO,UX
+      operator: in
+    - column_family: basic_info
+      qualifier: flight_cancelled
+      filter_value: 'false'
+      operator: equals
+      latest_version_only: true
+    - column_family: basic_info
+      qualifier: arrival_airport
+      filter_value: AMS
+      operator: equals
+      latest_version_only: true
+    - column_family: basic_info
+      qualifier: service_type
+      filter_value: J,Q
+      operator: in
+      latest_version_only: true
+  feature_level:

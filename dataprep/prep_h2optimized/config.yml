@@ -1,0 +1,93 @@
+data:
+  #PKS runs only in pks_cluster, change it to 000 if you want to execute in zoe
+  mode: cluster
+  version: v1
+  project_name: h2optimized
+  output_folder: '/user/blg_ds'
+  input_folder: '/user/blg_ds/flight_legs/'
+  date_window_start: 2022-06-02
+  date_window_end: 2022-06-02
+row_key_compose:
+  - row_key:departure_date
+  - row_key:carrier_name
+  - row_key:flight_number
+  - row_key:flight_suffix
+  - row_key:departure_airport
+features:
+  basic_info:
+  - flight_cancelled
+  - flight_group
+  - aircraft_type
+  - arrival_airport
+  - service_type
+  - commercial_first_class_configuration
+  - commercial_business_class_configuration
+  - commercial_economy_class_configuration
+  - aircraft_registration
+  bookings:
+  - total_business_class_bookings
+  - total_economy_class_bookings
+  pax_counts:
+  - business_class_pax_accepted
+  - economy_pax_accepted
+  - total_pax_stand_by
+  timestamps:
+  - scheduled_departure_time
+  - scheduled_arrival_time
+targets:
+  basic_info:
+  - flight_leg_before_suffix_change
+  - flight_leg_after_suffix_change
+  - flight_cancelled
+  - aircraft_type
+  - arrival_airport
+  - service_type
+  - flight_group
+  pax_counts:
+  - economy_pax_boarded
+  - business_class_pax_boarded
+  timestamps:
+  - actual_touch_down_time
+  - actual_arrival_time
+  - scheduled_departure_time
+  - scheduled_arrival_time
+  - actual_block_departure_time
+  - actual_take_off_time
+query_moments:
+  reference:
+    namespace: default
+    table: flight_legs
+    column_family: timestamps
+    qualifier: scheduled_departure_time
+  fixed:
+  - 7h
+  - 48h
+filters:
+  target_level:
+    - column_family: row_key
+      qualifier: carrier_name
+      filter_value: KL,WA
+      operator: in
+    - column_family: basic_info
+      qualifier: flight_cancelled
+      filter_value: 'false'
+      operator: equals
+      latest_version_only: true
+    - column_family: basic_info
+      qualifier: flight_group
+      filter_value: ICA
+      operator: equals
+      latest_version_only: true
+    - column_family: basic_info
+      qualifier: service_type
+      filter_value: J,Q
+      operator: in
+      latest_version_only: true
+    - column_family: basic_info
+      qualifier: aircraft_type
+      filter_value: 789,781,772,77W,332,333
+      operator: in
+  feature_level:
+    - column_family: bookings
+      qualifier: total_economy_class_bookings
+      include_missing: False
